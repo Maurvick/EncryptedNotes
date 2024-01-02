@@ -1,19 +1,10 @@
 ﻿using CaesarCipherApp.Models;
 using CaesarCipherApp.Services;
-using System;
+using EncryptedNotes.Views;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CaesarCipherApp
 {
@@ -22,7 +13,7 @@ namespace CaesarCipherApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private BindingList<User> _data;
+        private BindingList<User> _list;
         private FileManager _fileManager;
         private EventLogger _eventLogger;
 
@@ -38,43 +29,21 @@ namespace CaesarCipherApp
 
             try
             {
-                _data = _fileManager.LoadUsersFromFile();
+                _list = _fileManager.LoadUsersFromFile();
             }
             catch (Exception ex)
             {
                 _eventLogger.Log(ex.Message);
+
                 MessageBox.Show($"Faied to load data from file.");
             }
 
-            dgCipherList.ItemsSource = _data;
-        }
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            int cipherKey = int.Parse(txtCipherKey.Text);
-
-            string textToChipher = txtUserInput.Text;
-
-            if (txtUserInput.Text != "")
-            {
-                var encryptedText = EncryptionHelper.Encipher(textToChipher, cipherKey);
-
-                _data.Add(new User
-                {
-                    Id = 1,
-                    Text = encryptedText,
-                    Key = cipherKey,
-                });
-
-                _fileManager.SaveData(_data);
-
-                txtUserInput.Text = null;
-            }
+            dgCipherList.ItemsSource = _list;
         }
 
         private void mnuDecrypt_Click(object sender, RoutedEventArgs e)
         {
-            int cipherKey = int.Parse(txtCipherKey.Text);
+            int cipherKey = int.Parse("3");
 
             User selectedItem = (User)dgCipherList.SelectedItem;
 
@@ -92,7 +61,44 @@ namespace CaesarCipherApp
 
         private void mnuEncrypt_Click(object sender, RoutedEventArgs e)
         {
-            
+            EncryptionWindow w = new EncryptionWindow();
+
+            w.ShowDialog();
+
+            string text = w.Text;
+            int key = int.Parse(w.Key);
+
+            if (w.Text != null & w.Key != null)
+            {
+                var encryptedText = EncryptionHelper.Encipher(text, key);
+
+                _list.Add(new User
+                {
+                    Id = 1,
+                    Text = encryptedText,
+                    Key = key,
+                });
+
+                _fileManager.SaveData(_list);
+            }
+        }
+
+        private void mnuCopy_Click(object sender, RoutedEventArgs e)
+        {
+            // int cipherKey = int.Parse(txtCipherKey.Text);
+
+            User selectedItem = (User)dgCipherList.SelectedItem;
+
+            if (selectedItem != null)
+            {
+                // Access the property value from the selected item
+                string columnNameValue = selectedItem.Text ?? "";
+
+                // Do something with the value (e.g., display it)
+                string decryptedText = EncryptionHelper.Decipher(columnNameValue, 3);
+
+                Clipboard.SetText(decryptedText);
+            } 
         }
 
         private void mnuDelete_Click(object sender, RoutedEventArgs e)
