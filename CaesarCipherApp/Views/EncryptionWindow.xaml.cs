@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 
 namespace EncryptedNotes.Views
 {
@@ -8,30 +7,30 @@ namespace EncryptedNotes.Views
     /// </summary>
     public partial class EncryptionWindow : Window
     {
-        public EncryptionWindow()
-        {
-            InitializeComponent();
-        }
-
         private string _text;
-        private string _key;
-
+       
         public string Text
         {
             get { return _text; }
         }
+
+        private string _key;
 
         public string Key
         {
             get { return _key; }
         }
 
+        public EncryptionWindow()
+        {
+            InitializeComponent();
+        }
+
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             string text = txtText.Text;
             string key = txtKey.Text;
-            int num = 0;
-            bool isValid = int.TryParse(txtKey.Text, out num);
+            bool isValid = int.TryParse(txtKey.Text, out int num);
 
             if (!isValid)
             {

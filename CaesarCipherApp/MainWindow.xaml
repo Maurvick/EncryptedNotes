@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CaesarCipherApp"
-        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
         Title="CaesarCipherApp" Height="450" Width="800" Loaded="Window_Loaded">
     <Grid Background="#FFE5E5E5">
@@ -13,16 +12,15 @@
                 <Grid Background="#FFE5E5E5" Height="Auto">
                     <DataGrid x:Name="dgCipherList" FontSize="16" FontWeight="Bold" AutoGenerateColumns="False">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Path=Text}" IsReadOnly="True" Header="Text" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Header="Text" Width="*"/>
                             <DataGridTextColumn Binding="{Binding Path=Key}" IsReadOnly="True" Header="Key" Width="*"/>
                         </DataGrid.Columns>
 
                         <DataGrid.ContextMenu>
                             <ContextMenu>
                                 <!-- Custom menu items -->
-                                <MenuItem Header="Decrypt" Click="mnuDecrypt_Click" />
                                 <MenuItem Header="Encrypt" Click="mnuEncrypt_Click"/>
-                                <MenuItem Header="Delete" Click="mnuDelete_Click"/>
+                                <MenuItem Header="Decrypt" Click="mnuDecrypt_Click" />
                                 <!-- Default menu items (optional) -->
                                 <Separator/>
                                 <MenuItem Header="Copy" Click="mnuCopy_Click"/>

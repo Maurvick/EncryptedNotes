@@ -5,11 +5,16 @@ using System.IO;
 
 namespace CaesarCipherApp.Services
 {
-    internal class FileManager
+    internal class FileIOService
     {
-        private static readonly string PATH = $"{Environment.CurrentDirectory}\\user.json";
+        private readonly string PATH;
 
-        public BindingList<User> LoadUsersFromFile() 
+        public FileIOService(string path) 
+        {
+            PATH = path;
+        }
+
+        public BindingList<User>? LoadData() 
         {
             var fileExists = File.Exists(PATH);
 
@@ -28,7 +33,7 @@ namespace CaesarCipherApp.Services
             }
         }
         
-        public void SaveData(BindingList<User> users)
+        public void SaveData(object users)
         {
             using (StreamWriter writer = File.CreateText(PATH))
             {

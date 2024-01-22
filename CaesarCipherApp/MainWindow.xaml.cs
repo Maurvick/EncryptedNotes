@@ -13,47 +13,61 @@ namespace CaesarCipherApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private BindingList<User> _list;
-        private FileManager _fileManager;
-        private EventLogger _eventLogger;
-
+        private const string OUTPUT_TEXT_PATH = "./user.json";
+        private readonly FileIOService _fileIOService;
+        private BindingList<User>? dataList;
+        
         public MainWindow()
         {
             InitializeComponent();
+            _fileIOService = new FileIOService(OUTPUT_TEXT_PATH);
         }
 
-        // Load text from user.json when program starts
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            _fileManager = new FileManager();
-
             try
             {
-                _list = _fileManager.LoadUsersFromFile();
+                dataList = _fileIOService.LoadData();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _eventLogger.Log(ex.Message);
-
-                MessageBox.Show($"Faied to load data from file.");
+                MessageBox.Show("Failed to load data from file.");
             }
 
-            dgCipherList.ItemsSource = _list;
+            dgCipherList.ItemsSource = dataList;
+
+            dataList.ListChanged += dataList_ListChanged;
+        }
+
+        private void dataList_ListChanged(object? sender, ListChangedEventArgs e)
+        {
+            if (e.ListChangedType == ListChangedType.ItemAdded ||
+                e.ListChangedType == ListChangedType.ItemDeleted ||
+                e.ListChangedType == ListChangedType.ItemChanged)
+            {
+                try
+                {
+                    _fileIOService.SaveData(sender);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Failed to save data.");
+                }
+            }
         }
 
         private void mnuDecrypt_Click(object sender, RoutedEventArgs e)
         {
-            int cipherKey = int.Parse("3");
-
             User selectedItem = (User)dgCipherList.SelectedItem;
 
             if (selectedItem != null)
             {
                 // Access the property value from the selected item
-                string columnNameValue = selectedItem.Text;
+                string columnText = selectedItem.Text;
+                int columnKey = selectedItem.Key;
 
                 // Do something with the value (e.g., display it)
-                string decryptedText = EncryptionHelper.Decipher(columnNameValue, cipherKey);
+                string decryptedText = CaesarEncryptionService.Decipher(columnText, columnKey);
 
                 MessageBox.Show(decryptedText);
             }
@@ -70,23 +84,21 @@ namespace CaesarCipherApp
 
             if (w.Text != null & w.Key != null)
             {
-                var encryptedText = EncryptionHelper.Encipher(text, key);
+                var encryptedText = CaesarEncryptionService.Encipher(text, key);
 
-                _list.Add(new User
+                dataList.Add(new User
                 {
                     Id = 1,
                     Text = encryptedText,
                     Key = key,
                 });
 
-                _fileManager.SaveData(_list);
+                _fileIOService.SaveData(dataList);
             }
         }
 
         private void mnuCopy_Click(object sender, RoutedEventArgs e)
         {
-            // int cipherKey = int.Parse(txtCipherKey.Text);
-
             User selectedItem = (User)dgCipherList.SelectedItem;
 
             if (selectedItem != null)
@@ -95,7 +107,7 @@ namespace CaesarCipherApp
                 string columnNameValue = selectedItem.Text ?? "";
 
                 // Do something with the value (e.g., display it)
-                string decryptedText = EncryptionHelper.Decipher(columnNameValue, 3);
+                string decryptedText = CaesarEncryptionService.Decipher(columnNameValue, 3);
 
                 Clipboard.SetText(decryptedText);
             } 
@@ -107,7 +119,6 @@ namespace CaesarCipherApp
             DataGridColumn clickedColumn = dgCipherList.CurrentColumn;
             int columnIndexToRemove = dgCipherList.Columns.IndexOf(clickedColumn);
             dgCipherList.Columns.RemoveAt(columnIndexToRemove);
-            // _fileManager.SaveData(_data);
         }
 
         private void btnShowFolder_Click(object sender, RoutedEventArgs e)
@@ -125,9 +136,9 @@ namespace CaesarCipherApp
                 // Start the process
                 Process.Start(psi);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _eventLogger.Log(ex.Message);
+                MessageBox.Show("Failed to open program folder.");
             }
         }
     }
